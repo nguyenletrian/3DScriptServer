@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ConnectVBS</title>
+</head>
+<body>
+    <div>
+        <h2>ConnectVBS</h2>
+        <div>
+            Welcome {{ username }}
+            |
+            <a href="/logout">
+                Logout
+            </a>
+        </div>
+    </div>
+    <hr>
+    <div>
+        <a href="/dashboard">
+            Dashboard
+        </a>
+        |
+        <a href="/users">
+            Users
+        </a>
+        |
+        <a href="/license">
+            License
+        </a>
+        |
+        <a href="/logs">
+            Logs
+        </a>
+        |
+        <a href="/settings">
+            Settings
+        </a>
+    </div>
+    <hr>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

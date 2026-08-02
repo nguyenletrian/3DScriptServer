@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Login</title>
-</head>
 
 <body>
 
-<h1>ConnectVBS Login</h1>
-
-<form>
+<h1>Login</h1>
+{% if error %}
+<div>
+    {{ error }}
+</div>
+{% endif %}
+<form method="post">
 
     Username:
-    <input type="text">
+    <input
+        type="text"
+        name="username"
+        value="{{ username or '' }}"
+        >
 
     <br><br>
 
     Password:
-    <input type="password">
+    <input
+        type="password"
+        name="password">
 
     <br><br>
 
-    <button>
+    <button type="submit">
         Login
     </button>
 

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>User Management</h1>
+
+<table border="1">
+
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th colspan="2">Action</th>
+    </tr>
+
+    {% for user in users %}
+
+    <tr>
+
+        <td>{{ user.id }}</td>
+
+        <td>{{ user.username }}</td>
+
+        <td>{{ user.role }}</td>        
+        <td>
+            <a href="/users/delete/{{ user.id }}">
+                Delete
+            </a>
+
+        </td>
+        <td>
+            <a href="/users/edit/{{ user.id }}">
+                Edit
+            </a>
+        </td>
+
+    </tr>
+    </tr>
+        
+    {% endfor %}
+
+</table>
+
+{% endblock %}
