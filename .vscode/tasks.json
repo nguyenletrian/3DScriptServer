@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run FastAPI",
+            "type": "shell",
+            "command": "${workspaceFolder}\\run_server.bat",
+            "problemMatcher": []
+        }
+    ]
+}

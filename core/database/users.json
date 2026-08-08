@@ -10,11 +10,5 @@
         "username": "nguyenletrian2",
         "password": "$2b$12$dxk119jV7oXnq19wruMRqeN3t07/QfO23zi5yyUTJ5zLDblfBybf.",
         "role": "user"
-    },
-    {
-        "id": 4,
-        "username": "nguyenletrian3",
-        "password": "$2b$12$K9RuhmXwf1p9H3gb520Vc.YaIpnKc3.BPlZs7QJ.QGbXL1PG4Q2fm",
-        "role": "user"
     }
 ]
