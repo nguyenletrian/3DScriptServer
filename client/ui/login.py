@@ -114,15 +114,13 @@ class LoginWindow(QWidget):
                 )
             )
             return
-
-        # Save logged-in user
         session.set_user(
             result["user"]
         )
 
-        # Open main window
-        self.main_window = MainWindow()
-        self.main_window.show()
+        self.main_window = MainWindow(
+            self
+        )
 
-        # Hide login window
+        self.main_window.show()
         self.hide()
