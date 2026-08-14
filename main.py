@@ -40,3 +40,9 @@ def home(request: Request):
         request=request,
         name="index.html"
     )
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
