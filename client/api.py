@@ -17,3 +17,11 @@ def login(username, password):
     response.raise_for_status()
 
     return response.json()
+
+def get_apps():
+    response = requests.get(
+        f"{SERVER_URL}/apps",
+        timeout=5
+    )
+    response.raise_for_status()
+    return response.json()

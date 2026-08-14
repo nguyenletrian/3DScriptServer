@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
 )
 
 from .pages.dashboard import DashboardPage
+from .pages.apps import AppsPage
 
 from .. import session
 
@@ -79,11 +80,17 @@ class MainWindow(QWidget):
 
         self.pages = QStackedWidget()
 
-        self.dashboard_page = DashboardPage()
+        self.dashboard_page = DashboardPage()       
 
         self.pages.addWidget(
             self.dashboard_page
         )
+
+        self.apps_page = AppsPage()
+        self.pages.addWidget(
+            self.apps_page
+        )
+
 
         # =========================
         # Main Layout
@@ -108,6 +115,13 @@ class MainWindow(QWidget):
                 self.dashboard_page
             )
         )
+
+        self.apps_button.clicked.connect(
+            lambda: self.pages.setCurrentWidget(
+                self.apps_page
+            )
+        )
+        
 
         self.logout_button.clicked.connect(
             self.handle_logout

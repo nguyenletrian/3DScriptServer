@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "name": "Maya Tools",
+        "description": "Tools for Maya workflows"
+    },
+    {
+        "id": 2,
+        "name": "Pipeline Tools",
+        "description": "General pipeline utilities"
+    }
+]

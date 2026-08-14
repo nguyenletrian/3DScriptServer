@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from features.users.router import router as users_router
 from features.auth.router import router as auth_router
 from features.dashboard.router import router as dashboard_router
+from features.apps.router import router as apps_router
 
 app = FastAPI()
 
@@ -31,6 +32,9 @@ app.include_router(
     dashboard_router
 )
 
+app.include_router(
+    apps_router
+)
 
 
 @app.get("/", response_class=HTMLResponse)
