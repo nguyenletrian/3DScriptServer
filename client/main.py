@@ -9,7 +9,9 @@ def main():
 
     app = QApplication(sys.argv)
 
-    window = LoginWindow()
-    window.show()
+    login_window = LoginWindow()
+    login_window.show()
 
-    sys.exit(app.exec())
+    sys.exit(
+        app.exec()
+    )

@@ -1,0 +1,49 @@
+from PySide6.QtWidgets import (
+    QWidget,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
+
+from .. import session
+
+
+class MainWindow(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("ConnectVBS")
+        self.resize(500, 300)
+
+        user = session.get_user()
+
+        username = user["username"] if user else ""
+
+        self.welcome_label = QLabel(
+            f"Welcome, {username}"
+        )
+
+        self.logout_button = QPushButton(
+            "Logout"
+        )
+
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(
+            self.welcome_label
+        )
+
+        layout.addWidget(
+            self.logout_button
+        )
+
+        self.logout_button.clicked.connect(
+            self.handle_logout
+        )
+
+    def handle_logout(self):
+
+        session.clear_user()
+
+        self.close()
