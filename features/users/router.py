@@ -5,10 +5,7 @@ from core.dependencies import require_admin
 from .service import (
     get_all_users,
     get_user_by_id,
-    create_user,
-    update_user,
-    delete_user,
-    authenticate_user,
+    delete_user as delete_user_service,
 )
 
 
@@ -68,7 +65,7 @@ def delete_user(
     user=Depends(require_admin)
 ):
 
-    result = delete_user(user_id)
+    result = delete_user_service(user_id)
 
     if result is None:
         return {
