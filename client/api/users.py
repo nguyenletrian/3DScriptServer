@@ -1,11 +1,9 @@
-import requests
-
+from .session import session
 from ..config import SERVER_URL
 
 
 def get_users():
-
-    response = requests.get(
+    response = session.get(
         f"{SERVER_URL}/users",
         timeout=5,
     )
