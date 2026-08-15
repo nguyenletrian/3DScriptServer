@@ -16,26 +16,38 @@ class DashboardPage(QWidget):
 
     def setup_ui(self):
 
-        user = session.get_user()
-
-        username = user["username"] if user else "Unknown"
-
         title = QLabel("Dashboard")
         title.setStyleSheet(
             "font-size: 24px; font-weight: bold;"
         )
 
-        welcome = QLabel(
-            f"Welcome, {username}"
-        )
+        self.welcome_label = QLabel()
 
-        welcome.setStyleSheet(
+        self.welcome_label.setStyleSheet(
             "font-size: 16px;"
         )
 
         layout = QVBoxLayout(self)
 
         layout.addWidget(title)
-        layout.addWidget(welcome)
+        layout.addWidget(
+            self.welcome_label
+        )
 
         layout.addStretch()
+
+        self.refresh()
+
+    def refresh(self):
+
+        user = session.get_user()
+
+        username = (
+            user["username"]
+            if user
+            else "Unknown"
+        )
+
+        self.welcome_label.setText(
+            f"Welcome, {username}"
+        )

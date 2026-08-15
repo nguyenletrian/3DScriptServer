@@ -6,8 +6,8 @@ from PySide6.QtWidgets import (
 
 from .navigation import Navigation
 
-from .pages.auth.login import LoginPage
-from .pages.auth.register import RegisterPage
+from .pages.login import LoginPage
+from .pages.register import RegisterPage
 
 from .pages.dashboard import DashboardPage
 from .pages.apps import AppsPage
