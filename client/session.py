@@ -1,3 +1,6 @@
+import requests
+
+http = requests.Session()
 _current_user = None
 
 
@@ -15,5 +18,5 @@ def clear_user():
     _current_user = None
 
 
-def is_logged_in():
-    return _current_user is not None
+def get_http_session():
+    return http

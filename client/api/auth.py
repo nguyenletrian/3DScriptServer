@@ -1,9 +1,10 @@
-from .session import session
+from ..session import get_http_session, set_user
 from ..config import SERVER_URL
 
 
 def login(username, password):
-    response = session.post(
+
+    response = get_http_session().post(
         f"{SERVER_URL}/auth/login",
         json={
             "username": username,
@@ -13,8 +14,13 @@ def login(username, password):
     )
 
     response.raise_for_status()
-    return response.json()
 
+    data = response.json()
+
+    if data.get("success"):
+        set_user(data["user"])
+
+    return data
 
 def register(username, password):
     response = session.post(

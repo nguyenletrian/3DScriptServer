@@ -104,17 +104,13 @@ class AppWindow(QWidget):
         
 
     def show_page(self, page):
-
         self.pages.setCurrentWidget(page)
+        if hasattr(page, "on_show"):
+            page.on_show()       
 
     def refresh_ui(self):
-
         user = session.get_user()
-
-        print("CURRENT USER:", user)
-
         self.navigation.update(user)
-
         if user:
             self.show_page(
                 self.dashboard_page
@@ -125,9 +121,7 @@ class AppWindow(QWidget):
             )
 
     def logout(self):
-
         session.clear_user()
-
         self.refresh_ui()
 
     def handle_register_success(self):
