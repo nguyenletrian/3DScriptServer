@@ -98,6 +98,11 @@ class AppWindow(QWidget):
             self.refresh_ui
         )
 
+        self.register_page.register_success.connect(
+            self.handle_register_success
+        )
+        
+
     def show_page(self, page):
 
         self.pages.setCurrentWidget(page)
@@ -127,3 +132,11 @@ class AppWindow(QWidget):
         session.clear_user()
 
         self.refresh_ui()
+
+    def handle_register_success(self):
+        username = (self.register_page.username_edit.text())
+        self.register_page.password_edit.clear()
+        self.register_page.confirm_password_edit.clear()
+        self.login_page.username_edit.setText(username)
+        self.show_page(self.login_page)
+                
