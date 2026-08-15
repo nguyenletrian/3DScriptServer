@@ -4,6 +4,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from ...api.users import get_users
+
 
 class UsersPage(QWidget):
 
@@ -14,14 +16,44 @@ class UsersPage(QWidget):
 
     def setup_ui(self):
 
+        self.layout = QVBoxLayout(self)
+
         title = QLabel("Users")
 
         title.setStyleSheet(
             "font-size: 24px; font-weight: bold;"
         )
 
-        layout = QVBoxLayout(self)
+        self.layout.addWidget(title)
 
-        layout.addWidget(title)
+        self.load_users()
 
-        layout.addStretch()
+        self.layout.addStretch()
+
+    def load_users(self):
+
+        try:
+            result = get_users()
+
+        except Exception as e:
+
+            self.layout.addWidget(
+                QLabel(
+                    f"Failed to load users: {e}"
+                )
+            )
+
+            return
+
+        if not result.get("success"):
+            return
+
+        for user in result.get("users", []):
+
+            self.layout.addWidget(
+                QLabel(
+                    f'{user["id"]} | '
+                    f'{user["username"]} | '
+                    f'{user["role"]}'
+                )
+            )
