@@ -111,6 +111,21 @@ class AppWindow(QWidget):
 
         user = session.get_user()
 
+        print("CURRENT USER:", user)
+
+        self.navigation.update(user)
+
+        if user:
+            self.show_page(
+                self.dashboard_page
+            )
+        else:
+            self.show_page(
+                self.login_page
+            )
+
+        user = session.get_user()
+
         self.navigation.update(
             user
         )
