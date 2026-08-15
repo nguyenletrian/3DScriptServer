@@ -42,3 +42,31 @@ def login(
             "role": user["role"],
         }
     }
+
+@router.post("/register")
+def register(data: LoginRequest):
+
+    user = register_user(
+        data.username,
+        data.password,
+    )
+
+    if user is None:
+        return {
+            "success": False,
+            "message": "Username already exists.",
+        }
+
+    return {
+        "success": True,
+        "message": "Registration successful.",
+    }
+
+@router.post("/logout")
+def logout(request: Request):
+
+    request.session.clear()
+
+    return {
+        "success": True
+    }

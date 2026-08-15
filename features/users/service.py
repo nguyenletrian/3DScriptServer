@@ -3,7 +3,6 @@ from core.validation import (validate_username,validate_password)
 from .repository import user_repository
 
 def create_user(username,password,role="user"):
-
     username_check = validate_username(username)
     if not username_check["success"]:
         return username_check
@@ -30,27 +29,6 @@ def create_user(username,password,role="user"):
     return {
         "success": True,
         "message": "User created successfully.",
-        "user": user
-    }
-
-
-def authenticate_user(username,password):
-    user = user_repository.find_by_username(username)
-    if user is None:
-        return {
-            "success": False,
-            "message": "Username not found.",
-            "user": None
-        }
-    if not verify_password(password,user["password"]):
-        return {
-            "success": False,
-            "message": "Wrong password.",
-            "user": None
-        }
-    return {
-        "success": True,
-        "message": "Login success.",
         "user": user
     }
 

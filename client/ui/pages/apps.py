@@ -1,62 +1,44 @@
 from PySide6.QtWidgets import (
     QWidget,
     QLabel,
-    QFrame,
     QVBoxLayout,
 )
 
 from ...api.apps import get_apps
 
 
-class AppCard(QFrame):
-
-    def __init__(self, app):
-        super().__init__()
-
-        layout = QVBoxLayout(self)
-
-        name = QLabel(
-            app["name"]
-        )
-
-        description = QLabel(
-            app["description"]
-        )
-
-        name.setStyleSheet(
-            "font-size: 18px; font-weight: bold;"
-        )
-
-        description.setWordWrap(True)
-
-        layout.addWidget(name)
-        layout.addWidget(description)
-
-
 class AppsPage(QWidget):
-
     def __init__(self):
         super().__init__()
-
         self.setup_ui()
 
     def setup_ui(self):
-
         self.layout = QVBoxLayout(self)
-
         title = QLabel("Apps")
-
         title.setStyleSheet(
             "font-size: 24px; font-weight: bold;"
         )
-
         self.layout.addWidget(title)
-
-        self.load_apps()
+        self.apps_layout = QVBoxLayout()
+        self.layout.addLayout(
+            self.apps_layout
+        )
 
         self.layout.addStretch()
 
+    def on_show(self):
+        self.load_apps()
+
     def load_apps(self):
+        # Clear old apps
+        while self.apps_layout.count():
+
+            item = self.apps_layout.takeAt(0)
+
+            widget = item.widget()
+
+            if widget:
+                widget.deleteLater()
 
         try:
 
@@ -64,7 +46,7 @@ class AppsPage(QWidget):
 
         except Exception as e:
 
-            self.layout.addWidget(
+            self.apps_layout.addWidget(
                 QLabel(
                     f"Failed to load apps: {e}"
                 )
@@ -73,23 +55,13 @@ class AppsPage(QWidget):
             return
 
         if not result.get("success"):
-
-            self.layout.addWidget(
-                QLabel(
-                    result.get(
-                        "message",
-                        "Failed to load apps.",
-                    )
-                )
-            )
-
             return
 
-        for app in result.get(
-            "apps",
-            [],
-        ):
+        for app in result.get("apps", []):
 
-            self.layout.addWidget(
-                AppCard(app)
+            self.apps_layout.addWidget(
+                QLabel(
+                    f'{app["id"]} | '
+                    f'{app["name"]}'
+                )
             )

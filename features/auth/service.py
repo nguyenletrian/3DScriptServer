@@ -41,7 +41,6 @@ def register_user(username: str,password: str):
         password
     )
     user = {
-        "id": user_id,
         "username": username,
         "password": hashed_password,
         "role": "user"

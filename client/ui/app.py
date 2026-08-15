@@ -13,6 +13,8 @@ from .pages.dashboard import DashboardPage
 from .pages.apps import AppsPage
 from .pages.users import UsersPage
 
+from ..api.auth import logout as api_logout
+
 from .. import session
 
 
@@ -106,8 +108,8 @@ class AppWindow(QWidget):
     def show_page(self, page):
         self.pages.setCurrentWidget(page)
         if hasattr(page, "on_show"):
-            page.on_show()       
-
+            page.on_show() 
+            
     def refresh_ui(self):
         user = session.get_user()
         self.navigation.update(user)
@@ -121,6 +123,7 @@ class AppWindow(QWidget):
             )
 
     def logout(self):
+        api_logout()
         session.clear_user()
         self.refresh_ui()
 
