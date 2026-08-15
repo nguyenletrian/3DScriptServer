@@ -37,6 +37,10 @@ class MainWindow(QWidget):
         self.users_button = QPushButton(
             "Users"
         )
+        user = session.get_user()
+        if not user or user.get("role") != "admin":
+            self.users_button.hide()
+
 
         self.apps_button = QPushButton(
             "Apps"

@@ -18,17 +18,24 @@ class DashboardPage(QWidget):
 
         user = session.get_user()
 
-        username = user["username"] if user else ""
+        username = user["username"] if user else "Unknown"
 
-        title = QLabel(
-            "Dashboard"
+        title = QLabel("Dashboard")
+        title.setStyleSheet(
+            "font-size: 24px; font-weight: bold;"
         )
 
         welcome = QLabel(
             f"Welcome, {username}"
         )
 
+        welcome.setStyleSheet(
+            "font-size: 16px;"
+        )
+
         layout = QVBoxLayout(self)
 
         layout.addWidget(title)
         layout.addWidget(welcome)
+
+        layout.addStretch()
