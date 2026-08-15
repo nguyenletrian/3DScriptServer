@@ -1,10 +1,20 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QLabel,
-    QVBoxLayout,
-)
-
+from PySide6.QtWidgets import (QWidget,QLabel,QFrame,QVBoxLayout)
 from ...api import get_apps
+class AppCard(QFrame):
+
+    def __init__(self, app):
+        super().__init__()
+        layout = QVBoxLayout(self)
+        name = QLabel(app["name"])
+        description = QLabel(app["description"])
+        name.setStyleSheet(
+            "font-size: 18px; font-weight: bold;"
+        )
+
+        description.setWordWrap(True)
+
+        layout.addWidget(name)
+        layout.addWidget(description)
 
 
 class AppsPage(QWidget):
@@ -18,13 +28,17 @@ class AppsPage(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.title = QLabel("Apps")
+        title = QLabel("Apps")
 
-        self.layout.addWidget(
-            self.title
+        title.setStyleSheet(
+            "font-size: 24px; font-weight: bold;"
         )
 
+        self.layout.addWidget(title)
+
         self.load_apps()
+
+        self.layout.addStretch()
 
     def load_apps(self):
 
@@ -32,11 +46,13 @@ class AppsPage(QWidget):
             result = get_apps()
 
         except Exception as e:
+
             self.layout.addWidget(
                 QLabel(
                     f"Failed to load apps: {e}"
                 )
             )
+
             return
 
         if not result.get("success"):
@@ -44,13 +60,6 @@ class AppsPage(QWidget):
 
         for app in result.get("apps", []):
 
-            name = QLabel(
-                app["name"]
+            self.layout.addWidget(
+                AppCard(app)
             )
-
-            description = QLabel(
-                app["description"]
-            )
-
-            self.layout.addWidget(name)
-            self.layout.addWidget(description)
