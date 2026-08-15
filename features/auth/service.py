@@ -10,6 +10,8 @@ def authenticate_user(
         username=username
     )
 
+    print("AUTH USER:", user)
+
     if user is None:
         return None
 
@@ -18,6 +20,8 @@ def authenticate_user(
         user["password"]
     ):
         return None
+
+    print("AUTH SUCCESS:", user)
 
     return user
 

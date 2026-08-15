@@ -124,24 +124,6 @@ class AppWindow(QWidget):
                 self.login_page
             )
 
-        user = session.get_user()
-
-        self.navigation.update(
-            user
-        )
-
-        if user:
-
-            self.show_page(
-                self.dashboard_page
-            )
-
-        else:
-
-            self.show_page(
-                self.login_page
-            )
-
     def logout(self):
 
         session.clear_user()
