@@ -32,12 +32,12 @@ class Navigation(QWidget):
         layout.addWidget(self.logout_button)
 
 
-        self.login_button.clicked.connect(self.login_clicked.emit)
-        self.register_button.clicked.connect(self.register_clicked.emit)
-        self.dashboard_button.clicked.connect(self.dashboard_clicked.emit)
-        self.apps_button.clicked.connect(self.apps_clicked.emit)
-        self.users_button.clicked.connect(self.users_clicked.emit)
-        self.logout_button.clicked.connect(self.logout_clicked.emit)
+        self.login_button.clicked.connect(lambda: self.login_clicked.emit())
+        self.register_button.clicked.connect(lambda: self.register_clicked.emit())
+        self.dashboard_button.clicked.connect(lambda: self.dashboard_clicked.emit())
+        self.apps_button.clicked.connect(lambda: self.apps_clicked.emit())
+        self.users_button.clicked.connect(lambda: self.users_clicked.emit())
+        self.logout_button.clicked.connect(lambda: self.logout_clicked.emit())
 
     def update(self, user):
         logged_in = user is not None
