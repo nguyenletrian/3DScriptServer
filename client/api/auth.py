@@ -15,12 +15,11 @@ def login(username, password):
 
 def register(username, password):
     response = requests.post(
-        f"{SERVER_URL}/api/auth/register",
+        f"{SERVER_URL}/auth/register",
         json={
             "username": username,
             "password": password,
         },
         timeout=10,
     )
-
     return response.json()
