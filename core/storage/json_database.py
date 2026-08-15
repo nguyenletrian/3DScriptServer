@@ -1,26 +1,22 @@
 import json
-import os
-
-from core.config import settings
 
 
 class JsonDatabase:
 
-    def __init__(self):
-        self.database_path = settings.DATABASE_PATH
+    def __init__(self, database_path):
+        self.database_path = database_path
 
     def _get_path(self, collection):
-
-        return os.path.join(
-            self.database_path,
-            f"{collection}.json"
+        return (
+            self.database_path
+            / f"{collection}.json"
         )
 
     def _load(self, collection):
 
         path = self._get_path(collection)
 
-        if not os.path.exists(path):
+        if not path.exists():
             return []
 
         with open(
@@ -33,6 +29,11 @@ class JsonDatabase:
     def _save(self, collection, data):
 
         path = self._get_path(collection)
+
+        path.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
 
         with open(
             path,
@@ -66,12 +67,10 @@ class JsonDatabase:
         items = self._load(collection)
 
         if items:
-
             data["id"] = max(
                 item["id"]
                 for item in items
             ) + 1
-
         else:
             data["id"] = 1
 
