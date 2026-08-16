@@ -21,6 +21,7 @@ class AppsPage(QWidget):
         self.layout.addWidget(self.create_button)
 
         self.apps_layout = QVBoxLayout()
+        self.apps_layout.setSpacing(2)
         self.layout.addLayout(self.apps_layout)
         self.layout.addStretch()
 
@@ -45,11 +46,11 @@ class AppsPage(QWidget):
         for app in result.get("apps", []):
             row = QWidget()
             layout = QHBoxLayout(row)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(5)
             layout.addWidget(QLabel(f'{app["id"]} | ' f'{app["name"]}'))
-
             button = QPushButton("Delete")
             button.clicked.connect(lambda checked=False, app_id=app["id"]: self.delete_app(app_id))
-
             layout.addWidget(button)
             self.apps_layout.addWidget(row)
 
