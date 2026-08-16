@@ -8,39 +8,36 @@ from .list_builder import ListBuilder
 
 
 class PageBuilder(QWidget):
-
     def __init__(self, config, parent=None):
         super().__init__(parent)
         self.config = config or {}
-        self.api = self._load_api()
+        self.api = self._load("api")
+        self.functions = self._load("functions")
         self.editing_id = None
         self.form_panel = self.form = self.list = None
         self.setup_ui()
 
-    def _load_api(self):
+    def _load(self, kind):
         name = self.config.get("name")
-        if not name:
-            return None
-        try:
-            return importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.api")
-        except ModuleNotFoundError:
-            return None
+        if not name: return None
+        try: return importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.{kind}")
+        except ModuleNotFoundError: return None
 
-    def _call_api(self, action, *args):
-        function = getattr(self.api, f"{action}_{self.config['name'].rstrip('s')}", None)
-        if action == "get" and self.api:
-            function = getattr(self.api, f"get_{self.config['name']}", None)
-        return function(*args) if function else None
+    def _call(self, action, *args):
+        module = self.functions if action in self.config.get("data", {}) and self.functions else self.api
+        if not module: return None
+        if module is self.functions: return getattr(module, self.config["data"][action], None)(self, *args)
+        name = self.config["name"]
+        fn = getattr(module, f"get_{name}" if action == "get" else f"{action}_{name.rstrip('s')}", None)
+        return fn(*args) if fn else None
 
     def setup_ui(self):
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(10, 10, 10, 10)
-        self.layout.setSpacing(10)
+        self.layout = QVBoxLayout(self); self.layout.setContentsMargins(10, 10, 10, 10); self.layout.setSpacing(10)
         self._build_header(); self._build_list(); self._build_form(); self.layout.addStretch()
 
     def _build_header(self):
-        header = QHBoxLayout()
-        if title := self.config.get("title"):
+        header = QHBoxLayout(); title = self.config.get("title")
+        if title:
             label = QLabel(title); label.setStyleSheet("font-size: 24px; font-weight: bold;"); header.addWidget(label)
         header.addStretch()
         if button := self.config.get("add_button"):
@@ -50,25 +47,23 @@ class PageBuilder(QWidget):
     def _build_list(self):
         config = self.config.get("list")
         if not config: return
-        self.list = ListBuilder(config.get("columns", []), config.get("actions", []))
-        self.list.set_edit_callback(self.edit_item); self.list.set_delete_callback(self.delete_item); self.layout.addWidget(self.list)
+        self.list = ListBuilder(config.get("columns", []), config.get("actions", [])); self.list.set_edit_callback(self.edit_item); self.list.set_delete_callback(self.delete_item); self.layout.addWidget(self.list)
 
     def _build_form(self):
         config = self.config.get("form")
         if not config: return
-        popup = config.get("popup", True)
-        self.form_panel = QWidget(self); panel_layout = QVBoxLayout(self.form_panel); panel_layout.setContentsMargins(10, 10, 10, 10)
+        popup = config.get("popup", True); self.form_panel = QWidget(self); panel = QVBoxLayout(self.form_panel); panel.setContentsMargins(10, 10, 10, 10)
         if popup: self.form_panel.setStyleSheet("background: white; border: 1px solid #ccc;")
-        self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit")); self.form.setMaximumWidth(config.get("maximum_width", 300)); self.form.set_submit_callback(self.submit_form); panel_layout.addWidget(self.form, alignment=Qt.AlignHCenter)
-        if popup:
-            self._build_popup_buttons(panel_layout, config); self.form_panel.hide()
-        else:
-            self.form_panel.setStyleSheet(config.get("style", "")); panel_layout.addWidget(self.form.submit_button); self.layout.addWidget(self.form_panel, alignment=Qt.AlignHCenter)
+        self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit")); self.form.setMaximumWidth(config.get("maximum_width", 300)); self.form.set_submit_callback(self.submit_form); panel.addWidget(self.form, alignment=Qt.AlignHCenter)
+        if popup: self._build_popup_buttons(panel, config); self.form_panel.hide()
+        else: self.form_panel.setStyleSheet(config.get("style", "")); panel.addWidget(self.form.submit_button); self.layout.addWidget(self.form_panel, alignment=Qt.AlignHCenter)
 
     def _build_popup_buttons(self, layout, config):
         row = QHBoxLayout(); row.addWidget(self.form.submit_button)
-        if config.get("clear_button", True): self.clear_button = QPushButton(config.get("clear_text", "Clear")); self.clear_button.clicked.connect(self.clear_form); row.addWidget(self.clear_button)
-        if config.get("close_button", True): self.close_button = QPushButton(config.get("close_text", "Close")); self.close_button.clicked.connect(self.close_form); row.addWidget(self.close_button)
+        if config.get("clear_button", True):
+            self.clear_button = QPushButton(config.get("clear_text", "Clear")); self.clear_button.clicked.connect(self.clear_form); row.addWidget(self.clear_button)
+        if config.get("close_button", True):
+            self.close_button = QPushButton(config.get("close_text", "Close")); self.close_button.clicked.connect(self.close_form); row.addWidget(self.close_button)
         layout.addLayout(row)
 
     def resizeEvent(self, event):
@@ -91,25 +86,21 @@ class PageBuilder(QWidget):
     def on_show(self):
         if not self.api: return
         try:
-            result = self._call_api("get")
-            key = self.config.get("list", {}).get("data_key", self.config["name"])
+            result = self._call("get"); key = self.config.get("list", {}).get("data_key", self.config["name"])
             if result and result.get("success"): self.set_data(result.get(key, []))
         except Exception as e: self.set_error(str(e))
 
     def set_data(self, data):
         if self.list: self.list.set_data(data)
-
     def set_form_data(self, data):
         if self.form: self.form.set_data(data)
-
     def get_form_data(self): return self.form.get_data() if self.form else {}
     def clear_form(self):
         if self.form: self.form.clear()
 
     def set_error(self, message):
         if not hasattr(self, "error_label"):
-            self.error_label = QLabel(); self.error_label.setStyleSheet("color: red; border: none;")
-            if self.form_panel: self.form_panel.layout().addWidget(self.error_label)
+            self.error_label = QLabel(); self.error_label.setStyleSheet("color: red; border: none;"); self.form_panel.layout().addWidget(self.error_label)
         self.error_label.setText(message or "")
 
     def add_item(self):
@@ -122,17 +113,17 @@ class PageBuilder(QWidget):
         if self.form: self.form.submit_button.setText(self.config.get("form", {}).get("edit_submit_text", "Update"))
         self.show_form()
 
-    def delete_item(self, item):
-        self._mutate("delete", item.get("id"))
+    def delete_item(self, item): self._mutate("delete", item.get("id"))
 
     def submit_form(self, data):
-        self._mutate("update" if self.editing_id else "create", self.editing_id, data) if self.editing_id else self._mutate("create", data)
+        if self.editing_id: self._mutate("update", self.editing_id, data)
+        elif "submit" in self.config.get("data", {}): self._call("submit", data)
+        else: self._mutate("create", data)
 
     def _mutate(self, action, *args):
         try:
-            result = self._call_api(action, *args)
-            if result and result.get("success"):
-                self.close_form(); self.on_show()
+            result = self._call(action, *args)
+            if result and result.get("success"): self.close_form(); self.on_show()
             elif result: self.set_error(result.get("message", "Operation failed."))
         except Exception as e: self.set_error(str(e))
 
