@@ -1,3 +1,4 @@
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout
 
 
@@ -11,6 +12,8 @@ NAV_CONFIG = [
 
 
 class Navigation(QWidget):
+    page_clicked = Signal(str)
+    logout_clicked = Signal()
 
     def __init__(self):
         super().__init__()
@@ -26,17 +29,14 @@ class Navigation(QWidget):
             layout.addWidget(button)
         layout.addStretch()
         self.logout_button = QPushButton("Logout")
-        self.logout_button.clicked.connect(self.logout)
+        self.logout_button.clicked.connect(self.logout_clicked.emit)
         layout.addWidget(self.logout_button)
 
     def update(self, user):
         logged_in = user is not None
         for item in NAV_CONFIG:
-            visible = (not logged_in) if item.get("guest") else item.get("auth", False) and logged_in
+            visible = (not logged_in) if item.get("guest") else logged_in and item.get("auth", False)
             if item.get("role"):
                 visible = logged_in and user.get("role") == item["role"]
             self.buttons[item["name"]].setVisible(visible)
         self.logout_button.setVisible(logged_in)
-
-    def logout(self):
-        self.page_clicked.emit("logout")
