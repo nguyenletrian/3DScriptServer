@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 
 from ...api.rest import RestAPI
+from ...session import get_user
 from .form_builder import FormBuilder
 from .list_builder import ListBuilder
 
@@ -26,6 +27,10 @@ class PageBuilder(QWidget):
         try: return importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.{kind}")
         except ModuleNotFoundError: return None
 
+    def _is_allowed(self, action):
+        role = (get_user() or {}).get("role")
+        return action not in self.config.get("admin_only", []) or role == "admin"
+
     def _call(self, action, *args):
         data = self.config.get("data", {})
         if action in data and self.functions: return getattr(self.functions, data[action], lambda *_: None)(self, *args)
@@ -45,13 +50,15 @@ class PageBuilder(QWidget):
             label = QLabel(title); label.setStyleSheet("font-size: 24px; font-weight: bold;"); header.addWidget(label)
         header.addStretch()
         if button := self.config.get("add_button"):
-            self.add_button = QPushButton(button.get("text", "Add")); self.add_button.clicked.connect(self.add_item); header.addWidget(self.add_button)
+            if self._is_allowed("add"):
+                self.add_button = QPushButton(button.get("text", "Add")); self.add_button.clicked.connect(self.add_item); header.addWidget(self.add_button)
         self.layout.addLayout(header)
 
     def _build_list(self):
         config = self.config.get("list")
         if not config: return
-        self.list = ListBuilder(config.get("columns", []), config.get("actions", []))
+        actions = [action for action in config.get("actions", []) if self._is_allowed(action)]
+        self.list = ListBuilder(config.get("columns", []), actions)
         self.list.set_activate_callback(self.activate_item)
         self.list.set_edit_callback(self.edit_item)
         self.list.set_delete_callback(self.delete_item)
@@ -59,7 +66,7 @@ class PageBuilder(QWidget):
 
     def _build_form(self):
         config = self.config.get("form")
-        if not config: return
+        if not config or not any(self._is_allowed(action) for action in ("add", "edit")): return
         popup = config.get("popup", True); self.form_panel = QWidget(self); panel = QVBoxLayout(self.form_panel); panel.setContentsMargins(10, 10, 10, 10)
         if popup: self.form_panel.setStyleSheet("background: white; border: 1px solid #ccc;")
         self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit")); self.form.setMinimumWidth(300); self.form.setMaximumWidth(max(300, self.width() - 40)); self.form.set_submit_callback(self.submit_form); panel.addWidget(self.form, alignment=Qt.AlignHCenter)
@@ -97,7 +104,7 @@ class PageBuilder(QWidget):
         if not (self.api or self.rest): return
         try:
             result = self._call("get"); key = self.config.get("list", {}).get("data_key", self.config["name"])
-            if result and result.get("success"): self.set_data(result.get(key, []))
+            if result and result.get("success"): self.set_data(result.get(key, result.get("data", [])))
         except Exception as e: self.set_error(str(e))
 
     def set_data(self, data):
@@ -114,17 +121,21 @@ class PageBuilder(QWidget):
         self.error_label.setText(message or "")
 
     def add_item(self):
+        if not self._is_allowed("add"): return
         self.editing_id = None; self.clear_form()
         if self.form: self.form.submit_button.setText(self.config.get("form", {}).get("submit_text", "Submit"))
         self.show_form()
 
     def edit_item(self, item):
+        if not self._is_allowed("edit"): return
         self.editing_id = item.get("id"); self.set_form_data(item)
         if self.form: self.form.submit_button.setText(self.config.get("form", {}).get("edit_submit_text", "Update"))
         self.show_form()
 
-    def activate_item(self, item): self._mutate("activate", item.get("id"), callback=self.activate_callback)
-    def delete_item(self, item): self._mutate("delete", item.get("id"))
+    def activate_item(self, item):
+        self._mutate("activate", item.get("id"), callback=self.activate_callback)
+    def delete_item(self, item):
+        if self._is_allowed("delete"): self._mutate("delete", item.get("id"))
     def set_activate_callback(self, callback): self.activate_callback = callback
 
     def submit_form(self, data):
