@@ -46,7 +46,8 @@ class AppWindow(QWidget):
         if not instance:
             QMessageBox.warning(self, "Activation", "Application activation returned no instance.")
             return
-        if str(instance.get("application_id")) != "coffee":
+        short_name = str(instance.get("short_name", ""))
+        if not short_name.startswith("coffee_"):
             QMessageBox.information(self, "Activation", f"{instance.get('name', 'Application')} activated successfully.")
             return
         if self.coffee_runtime:
