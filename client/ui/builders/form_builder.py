@@ -30,23 +30,16 @@ class FormBuilder(QWidget):
     def _add_field(self, name, config):
         label = QLabel(config.get("label", name))
         label.setStyleSheet("border: none;")
-
         self.layout.addWidget(label)
 
         widget = self._create_widget(config)
-
         error = QLabel()
-        error.setStyleSheet(
-            "border: none;"
-            "color: red;"
-        )
+        error.setStyleSheet("border: none; color: red;")
         error.hide()
 
         widget.installEventFilter(self)
-
         self.widgets[name] = widget
         self.errors[name] = error
-
         self.layout.addWidget(widget)
         self.layout.addWidget(error)
 
@@ -69,14 +62,18 @@ class FormBuilder(QWidget):
             widget.addItems(config.get("options", []))
             return widget
 
-        return QLineEdit()
+        widget = QLineEdit()
+        if widget_type == "password":
+            widget.setEchoMode(QLineEdit.Password)
+        if config.get("placeholder"):
+            widget.setPlaceholderText(config["placeholder"])
+        return widget
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
             if self._is_last_widget(obj):
                 self.submit()
                 return True
-
         return super().eventFilter(obj, event)
 
     def _is_last_widget(self, widget):
@@ -87,9 +84,7 @@ class FormBuilder(QWidget):
         for name, widget in self.widgets.items():
             if name not in data:
                 continue
-
             value = data[name]
-
             if isinstance(widget, QCheckBox):
                 widget.setChecked(bool(value))
             elif isinstance(widget, QComboBox):
@@ -105,7 +100,6 @@ class FormBuilder(QWidget):
 
     def get_data(self):
         data = {}
-
         for name, widget in self.widgets.items():
             if isinstance(widget, QCheckBox):
                 value = widget.isChecked()
@@ -117,35 +111,27 @@ class FormBuilder(QWidget):
                 value = widget.text()
             else:
                 value = widget.value()
-
             formatter = get_formatter(self.fields[name].get("formatter"))
             data[name] = formatter(value) if formatter else value
-
         return data
 
     def validate(self):
         self.clear_errors()
         data = self.get_data()
         first_error = None
-
         for name, config in self.fields.items():
             value = data[name]
-
             if config.get("required") and not validate_required(value):
                 self.show_error(name, config.get("required_message", "This field is required."))
                 first_error = first_error or self.widgets[name]
                 continue
-
             validator = get_validator(config.get("validator"))
-
             if validator and validator(value) is not True:
                 self.show_error(name, config.get("invalid_message", "Invalid value."))
                 first_error = first_error or self.widgets[name]
-
         if first_error:
             first_error.setFocus()
             return False
-
         return True
 
     def show_error(self, name, message):
@@ -176,5 +162,4 @@ class FormBuilder(QWidget):
                 widget.clear()
             else:
                 widget.setValue(0)
-
         self.clear_errors()
