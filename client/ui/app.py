@@ -4,8 +4,7 @@ from .navigation import Navigation
 from .pages.login import LoginPage
 from .pages.register import RegisterPage
 from .pages.dashboard import DashboardPage
-from .pages.apps import AppsPage
-from .pages.users import UsersPage
+from .builders.page_builder import build_page
 from ..api.auth import logout as api_logout
 from .. import session
 
@@ -22,33 +21,24 @@ class AppWindow(QWidget):
     def setup_ui(self):
         self.navigation = Navigation()
         self.pages = QStackedWidget()
-
         self.login_page = LoginPage()
         self.register_page = RegisterPage()
         self.dashboard_page = DashboardPage()
-        self.apps_page = AppsPage()
-        self.users_page = UsersPage()
+        self.apps_page = build_page("apps")
+        self.users_page = build_page("users")
 
-        for page in (
-            self.login_page,
-            self.register_page,
-            self.dashboard_page,
-            self.apps_page,
-            self.users_page,
-        ):
+        for page in (self.login_page, self.register_page, self.dashboard_page, self.apps_page, self.users_page):
             self.pages.addWidget(page)
 
         main_layout = QHBoxLayout(self)
         main_layout.addWidget(self.navigation)
         main_layout.addWidget(self.pages)
-
         self.navigation.login_clicked.connect(lambda: self.show_page(self.login_page))
         self.navigation.register_clicked.connect(lambda: self.show_page(self.register_page))
         self.navigation.dashboard_clicked.connect(lambda: self.show_page(self.dashboard_page))
         self.navigation.apps_clicked.connect(lambda: self.show_page(self.apps_page))
         self.navigation.users_clicked.connect(lambda: self.show_page(self.users_page))
         self.navigation.logout_clicked.connect(self.logout)
-
         self.login_page.login_success.connect(self.refresh_ui)
         self.register_page.register_success.connect(self.handle_register_success)
 
