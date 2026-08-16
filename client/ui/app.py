@@ -23,7 +23,7 @@ class AppWindow(QWidget):
         self.login_page = LoginPage()
         self.register_page = RegisterPage()
         self.dashboard_page = DashboardPage()
-        self.dynamic_pages = build_pages("apps", "users")
+        self.dynamic_pages = build_pages("applications", "users")
 
         for page in (self.login_page, self.register_page, self.dashboard_page, *self.dynamic_pages.values()):
             self.pages.addWidget(page)

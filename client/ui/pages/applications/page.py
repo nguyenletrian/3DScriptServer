@@ -1,15 +1,15 @@
 PAGE_CONFIG = {
-    "name": "apps",
-    "title": "Apps",
-    "endpoint": "/apps",
+    "name": "applications",
+    "title": "Applications",
+    "endpoint": "/applications",
     "payload_key": "data",
-    "add_button": {"text": "Add App"},
+    "add_button": {"text": "Add Application"},
     "form": {
         "fields": {
             "name": {"type": "text", "label": "Name", "required": True},
             "description": {"type": "textarea", "label": "Description"},
         },
-        "submit_text": "Create App", "edit_submit_text": "Update App",
+        "submit_text": "Create Application", "edit_submit_text": "Update Application",
         "clear_button": True, "close_button": True, "popup_width": 360, "maximum_width": 300,
     },
     "list": {

@@ -6,7 +6,7 @@ NAV_CONFIG = [
     {"name": "login", "title": "Login", "guest": True},
     {"name": "register", "title": "Register", "guest": True},
     {"name": "dashboard", "title": "Dashboard", "auth": True},
-    {"name": "apps", "title": "Apps", "auth": True},
+    {"name": "applications", "title": "Applications", "auth": True},
     {"name": "users", "title": "Users", "role": "admin"},
 ]
 
