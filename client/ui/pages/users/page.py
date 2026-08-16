@@ -2,7 +2,6 @@ PAGE_CONFIG = {
     "name": "users",
     "title": "Users",
     "add_button": {"text": "Add User"},
-    "data": {"loader": "load", "creator": "create", "updater": "update", "deleter": "delete"},
     "form": {
         "popup": True,
         "fields": {
