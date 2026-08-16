@@ -5,7 +5,7 @@ from .pages.login import LoginPage
 from .pages.register.page import RegisterPage
 from .pages.dashboard import DashboardPage
 from .builders.page_builder import build_pages
-from .runtimes.coffee import CoffeeRuntime
+from .runtimes.registry import APPLICATION_RUNTIMES
 from ..api.auth import logout as api_logout
 from .. import session
 
@@ -15,7 +15,7 @@ class AppWindow(QWidget):
         super().__init__()
         self.setWindowTitle("ConnectVBS")
         self.resize(900, 600)
-        self.coffee_runtime = None
+        self.application_runtime = None
         self.setup_ui()
         self.refresh_ui()
 
@@ -34,7 +34,7 @@ class AppWindow(QWidget):
 
     def show_page(self, name):
         pages = {"login": self.login_page, "register": self.register_page, "dashboard": self.dashboard_page, **self.dynamic_pages}
-        if self.coffee_runtime: pages["coffee"] = self.coffee_runtime
+        if self.application_runtime: pages["application"] = self.application_runtime
         page = pages.get(name)
         if page:
             self.pages.setCurrentWidget(page)
@@ -46,22 +46,23 @@ class AppWindow(QWidget):
         if not instance:
             QMessageBox.warning(self, "Activation", "Application activation returned no instance.")
             return
-        short_name = str(instance.get("short_name", ""))
-        if not short_name.startswith("coffee_"):
-            QMessageBox.information(self, "Activation", f"{instance.get('name', 'Application')} activated successfully.")
+        application_id = instance.get("application_id")
+        runtime_class = APPLICATION_RUNTIMES.get(application_id)
+        if not runtime_class:
+            QMessageBox.information(self, "Activation", f"Application {application_id} activated successfully.")
             return
-        if self.coffee_runtime:
-            self.pages.removeWidget(self.coffee_runtime); self.coffee_runtime.deleteLater()
-        self.coffee_runtime = CoffeeRuntime(instance, self); self.pages.addWidget(self.coffee_runtime)
-        self.show_page("coffee"); self.coffee_runtime.show_page("coffee_dashboard")
+        if self.application_runtime:
+            self.pages.removeWidget(self.application_runtime); self.application_runtime.deleteLater()
+        self.application_runtime = runtime_class(instance, self); self.pages.addWidget(self.application_runtime)
+        self.show_page("application"); self.application_runtime.show_page(self.application_runtime.PAGE_NAMES[0])
 
     def refresh_ui(self):
         user = session.get_user(); self.navigation.update(user); self.show_page("dashboard" if user else "login")
 
     def logout(self):
         api_logout(); session.clear_user()
-        if self.coffee_runtime:
-            self.pages.removeWidget(self.coffee_runtime); self.coffee_runtime.deleteLater(); self.coffee_runtime = None
+        if self.application_runtime:
+            self.pages.removeWidget(self.application_runtime); self.application_runtime.deleteLater(); self.application_runtime = None
         self.refresh_ui()
 
     def handle_register_success(self):
