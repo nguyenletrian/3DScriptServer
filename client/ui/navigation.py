@@ -1,49 +1,42 @@
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import (QWidget,QPushButton,QVBoxLayout,)
+from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout
+
+
+NAV_CONFIG = [
+    {"name": "login", "title": "Login", "guest": True},
+    {"name": "register", "title": "Register", "guest": True},
+    {"name": "dashboard", "title": "Dashboard", "auth": True},
+    {"name": "apps", "title": "Apps", "auth": True},
+    {"name": "users", "title": "Users", "role": "admin"},
+]
 
 
 class Navigation(QWidget):
-    login_clicked = Signal()
-    register_clicked = Signal()
-    dashboard_clicked = Signal()
-    apps_clicked = Signal()
-    users_clicked = Signal()
-    logout_clicked = Signal()
 
     def __init__(self):
         super().__init__()
+        self.buttons = {}
         self.setup_ui()
 
     def setup_ui(self):
-        self.login_button = QPushButton("Login")
-        self.register_button = QPushButton("Register")
-        self.dashboard_button = QPushButton("Dashboard")
-        self.apps_button = QPushButton("Apps")
-        self.users_button = QPushButton("Users")
-        self.logout_button = QPushButton("Logout")
-
         layout = QVBoxLayout(self)
-        layout.addWidget(self.login_button)
-        layout.addWidget(self.register_button)
-        layout.addWidget(self.dashboard_button)
-        layout.addWidget(self.apps_button)
-        layout.addWidget(self.users_button)
+        for item in NAV_CONFIG:
+            button = QPushButton(item["title"])
+            button.clicked.connect(lambda _, name=item["name"]: self.page_clicked.emit(name))
+            self.buttons[item["name"]] = button
+            layout.addWidget(button)
         layout.addStretch()
+        self.logout_button = QPushButton("Logout")
+        self.logout_button.clicked.connect(self.logout)
         layout.addWidget(self.logout_button)
-
-
-        self.login_button.clicked.connect(lambda: self.login_clicked.emit())
-        self.register_button.clicked.connect(lambda: self.register_clicked.emit())
-        self.dashboard_button.clicked.connect(lambda: self.dashboard_clicked.emit())
-        self.apps_button.clicked.connect(lambda: self.apps_clicked.emit())
-        self.users_button.clicked.connect(lambda: self.users_clicked.emit())
-        self.logout_button.clicked.connect(lambda: self.logout_clicked.emit())
 
     def update(self, user):
         logged_in = user is not None
-        self.login_button.setVisible(not logged_in)
-        self.register_button.setVisible(not logged_in)
-        self.dashboard_button.setVisible(logged_in)
-        self.apps_button.setVisible(logged_in)
-        self.users_button.setVisible(logged_in and user.get("role") == "admin")
+        for item in NAV_CONFIG:
+            visible = (not logged_in) if item.get("guest") else item.get("auth", False) and logged_in
+            if item.get("role"):
+                visible = logged_in and user.get("role") == item["role"]
+            self.buttons[item["name"]].setVisible(visible)
         self.logout_button.setVisible(logged_in)
+
+    def logout(self):
+        self.page_clicked.emit("logout")
