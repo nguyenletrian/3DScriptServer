@@ -1,0 +1,5 @@
+[
+  {"id": "cus_001", "name": "Nguyen An", "phone": "0901000001", "note": "Regular customer"},
+  {"id": "cus_002", "name": "Tran Minh", "phone": "0901000002", "note": ""},
+  {"id": "cus_003", "name": "Le Ha", "phone": "0901000003", "note": "Prefers less sugar"}
+]
