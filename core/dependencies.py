@@ -22,9 +22,11 @@ def require_admin(request: Request):
 
 def require_instance_access(user, instance_id, write=False):
     if not instance_id: raise HTTPException(status_code=400, detail="application_instance_id is required.")
+    instance = next((x for x in BaseRepository("application_instances").get_all() if str(x.get("id")) == str(instance_id) and x.get("status", "active") == "active"), None)
+    if not instance: raise HTTPException(status_code=404, detail="Application instance not found.")
     if user.get("role") == "admin": return True
     permissions = BaseRepository("application_instance_permissions").get_all()
-    permission = next((p for p in permissions if p.get("application_instance_id") == instance_id and p.get("user_id") == user["id"] and p.get("status", "active") == "active"), None)
+    permission = next((p for p in permissions if str(p.get("application_instance_id")) == str(instance_id) and str(p.get("user_id")) == str(user["id"]) and p.get("status", "active") == "active"), None)
     if not permission: raise HTTPException(status_code=403, detail="You do not have access to this application instance.")
     if write and not ("*" in permission.get("permissions", []) or any(p.endswith(".write") or p in {"manage", "admin"} for p in permission.get("permissions", []))):
         raise HTTPException(status_code=403, detail="Write access required.")
