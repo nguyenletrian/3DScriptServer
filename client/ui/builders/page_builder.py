@@ -136,3 +136,7 @@ class PageBuilder(QWidget):
 def build_page(name):
     module = importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.page")
     return PageBuilder(module.PAGE_CONFIG)
+
+
+def build_pages(*names):
+    return {name: build_page(name) for name in names}
