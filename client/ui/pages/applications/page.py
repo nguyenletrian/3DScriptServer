@@ -1,6 +1,7 @@
 PAGE_CONFIG = {
     "name": "applications", "title": "Applications", "endpoint": "/applications", "payload_key": "data",
     "admin_only": ["add", "edit", "delete"],
+    "data": {"activate": "activate"},
     "add_button": {"text": "Add Application"},
     "form": {
         "fields": {"name": {"type": "text", "label": "Name", "required": True}, "description": {"type": "textarea", "label": "Description"}},
