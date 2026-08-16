@@ -9,12 +9,13 @@ from .list_builder import ListBuilder
 
 
 class PageBuilder(QWidget):
-    def __init__(self, config, parent=None):
+    def __init__(self, config, parent=None, instance=None):
         super().__init__(parent)
         self.config = config or {}
+        self.instance = instance or {}
         self.api = self._load("api")
         self.functions = self._load("functions")
-        self.rest = RestAPI(self.config["endpoint"], self.config.get("payload_key")) if self.config.get("endpoint") else None
+        self.rest = RestAPI(self.config["endpoint"], self.config.get("payload_key"), self.instance.get("id")) if self.config.get("endpoint") else None
         self.editing_id = None
         self.form_panel = self.form = self.list = None
         self.activate_callback = None
@@ -144,10 +145,10 @@ class PageBuilder(QWidget):
         except Exception as e: self.set_error(str(e))
 
 
-def build_page(name):
+def build_page(name, instance=None):
     module = importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.page")
-    return PageBuilder(module.PAGE_CONFIG)
+    return PageBuilder(module.PAGE_CONFIG, instance=instance)
 
 
-def build_pages(*names):
-    return {name: build_page(name) for name in names}
+def build_pages(*names, instance=None):
+    return {name: build_page(name, instance=instance) for name in names}
