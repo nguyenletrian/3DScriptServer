@@ -17,6 +17,7 @@ class PageBuilder(QWidget):
         self.rest = RestAPI(self.config["endpoint"], self.config.get("payload_key")) if self.config.get("endpoint") else None
         self.editing_id = None
         self.form_panel = self.form = self.list = None
+        self.activate_callback = None
         self.setup_ui()
 
     def _load(self, kind):
@@ -50,7 +51,11 @@ class PageBuilder(QWidget):
     def _build_list(self):
         config = self.config.get("list")
         if not config: return
-        self.list = ListBuilder(config.get("columns", []), config.get("actions", [])); self.list.set_edit_callback(self.edit_item); self.list.set_delete_callback(self.delete_item); self.layout.addWidget(self.list)
+        self.list = ListBuilder(config.get("columns", []), config.get("actions", []))
+        self.list.set_activate_callback(self.activate_item)
+        self.list.set_edit_callback(self.edit_item)
+        self.list.set_delete_callback(self.delete_item)
+        self.layout.addWidget(self.list)
 
     def _build_form(self):
         config = self.config.get("form")
@@ -105,7 +110,7 @@ class PageBuilder(QWidget):
 
     def set_error(self, message):
         if not hasattr(self, "error_label"):
-            self.error_label = QLabel(); self.error_label.setStyleSheet("color: red; border: none;"); self.form_panel.layout().addWidget(self.error_label)
+            self.error_label = QLabel(); self.error_label.setStyleSheet("color: red; border: none;"); target = self.form_panel or self; target.layout().addWidget(self.error_label)
         self.error_label.setText(message or "")
 
     def add_item(self):
@@ -118,17 +123,21 @@ class PageBuilder(QWidget):
         if self.form: self.form.submit_button.setText(self.config.get("form", {}).get("edit_submit_text", "Update"))
         self.show_form()
 
+    def activate_item(self, item): self._mutate("activate", item.get("id"), callback=self.activate_callback)
     def delete_item(self, item): self._mutate("delete", item.get("id"))
+    def set_activate_callback(self, callback): self.activate_callback = callback
 
     def submit_form(self, data):
         if self.editing_id: self._mutate("update", self.editing_id, data)
         elif "submit" in self.config.get("data", {}): self._call("submit", data)
         else: self._mutate("create", data)
 
-    def _mutate(self, action, *args):
+    def _mutate(self, action, *args, callback=None):
         try:
             result = self._call(action, *args)
-            if result and result.get("success"): self.close_form(); self.on_show()
+            if result and result.get("success"):
+                if callback: callback(result)
+                elif action != "activate": self.close_form(); self.on_show()
             elif result: self.set_error(result.get("message", "Operation failed."))
         except Exception as e: self.set_error(str(e))
 
