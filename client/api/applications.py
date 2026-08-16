@@ -1,6 +1,6 @@
 from ..config import SERVER_URL
 from ..session import get_http_session
-from .application_instances import activate_application
+from .application_instances import activate_application as _activate_application
 
 
 def get_applications():
@@ -28,4 +28,4 @@ def delete_application(application_id):
 
 
 def activate_application(application_id):
-    return activate_application(application_id)
+    return _activate_application(application_id)
