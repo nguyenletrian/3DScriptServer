@@ -1,0 +1,4 @@
+PAGE_CONFIG = {
+    "name": "coffee_products", "title": "Products", "endpoint": "/coffee/products", "list": {"data_key": "coffee_products", "columns": [{"name": "id", "label": "ID"}, {"name": "name", "label": "Name"}, {"name": "category_id", "label": "Category"}, {"name": "price", "label": "Price"}, {"name": "status", "label": "Status"}], "actions": ["edit", "delete"]},
+    "add_button": {"text": "Add Product"}, "form": {"fields": {"name": {"type": "text", "label": "Name", "required": True}, "category_id": {"type": "text", "label": "Category ID", "required": True}, "price": {"type": "number", "label": "Price", "required": True}, "status": {"type": "select", "label": "Status", "options": ["active", "inactive"], "required": True}}, "submit_text": "Create Product", "edit_submit_text": "Update Product", "clear_button": True, "close_button": True, "popup_width": 380}
+}
