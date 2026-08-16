@@ -1,10 +1,5 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QLabel,
-    QVBoxLayout,
-)
-
-from ...api.apps import get_apps
+from PySide6.QtWidgets import (QWidget,QLabel,QVBoxLayout,QLineEdit,QPushButton,)
+from ...api.apps import (get_apps,create_app,)
 
 
 class AppsPage(QWidget):
@@ -13,15 +8,17 @@ class AppsPage(QWidget):
         self.setup_ui()
 
     def setup_ui(self):
-        self.layout = QVBoxLayout(self)
-        title = QLabel("Apps")
-        title.setStyleSheet(
-            "font-size: 24px; font-weight: bold;"
+        self.name_edit = QLineEdit()
+        self.name_edit.setPlaceholderText("App name")
+        self.create_button = QPushButton("Create App")
+        self.layout.addWidget(
+            self.name_edit
         )
-        self.layout.addWidget(title)
-        self.apps_layout = QVBoxLayout()
-        self.layout.addLayout(
-            self.apps_layout
+        self.layout.addWidget(
+            self.create_button
+        )
+        self.create_button.clicked.connect(
+            self.create_app
         )
 
         self.layout.addStretch()
@@ -30,6 +27,7 @@ class AppsPage(QWidget):
         self.load_apps()
 
     def load_apps(self):
+        
         # Clear old apps
         while self.apps_layout.count():
 
@@ -65,3 +63,31 @@ class AppsPage(QWidget):
                     f'{app["name"]}'
                 )
             )
+            
+    def create_app(self):
+        name = self.name_edit.text().strip()
+
+        if not name:
+            return
+
+        try:
+
+            result = create_app(name)
+
+        except Exception as e:
+
+            self.apps_layout.addWidget(
+                QLabel(
+                    f"Failed to create app: {e}"
+                )
+            )
+
+            return
+
+        if not result.get("success"):
+            return
+
+        self.name_edit.clear()
+
+        self.load_apps()
+

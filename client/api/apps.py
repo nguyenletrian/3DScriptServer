@@ -12,3 +12,14 @@ def get_apps():
     response.raise_for_status()
 
     return response.json()
+
+def create_app(name):
+    response = get_http_session().post(
+        f"{SERVER_URL}/apps",
+        json={
+            "name": name,
+        },
+        timeout=5,
+    )
+    response.raise_for_status()
+    return response.json()
