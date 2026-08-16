@@ -1,6 +1,7 @@
 PAGE_CONFIG = {
     "name": "users",
     "title": "Users",
+    "endpoint": "/users",
     "add_button": {"text": "Add User"},
     "form": {
         "popup": True,
