@@ -7,3 +7,6 @@ def get_apps():
 
 def create_app(name):
     return app_repository.insert({"name": name})
+
+def delete_app(app_id):
+    return app_repository.delete(app_id)

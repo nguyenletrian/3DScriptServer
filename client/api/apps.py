@@ -23,3 +23,11 @@ def create_app(name):
     )
     response.raise_for_status()
     return response.json()
+
+def delete_app(app_id):
+    response = get_http_session().delete(
+        f"{SERVER_URL}/apps/{app_id}",
+        timeout=5,
+    )
+    response.raise_for_status()
+    return response.json()
