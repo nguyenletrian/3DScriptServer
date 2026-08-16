@@ -3,6 +3,7 @@ import importlib
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 
+from ...api.rest import RestAPI
 from .form_builder import FormBuilder
 from .list_builder import ListBuilder
 
@@ -13,6 +14,7 @@ class PageBuilder(QWidget):
         self.config = config or {}
         self.api = self._load("api")
         self.functions = self._load("functions")
+        self.rest = RestAPI(self.config["endpoint"], self.config.get("payload_key")) if self.config.get("endpoint") else None
         self.editing_id = None
         self.form_panel = self.form = self.list = None
         self.setup_ui()
@@ -24,12 +26,13 @@ class PageBuilder(QWidget):
         except ModuleNotFoundError: return None
 
     def _call(self, action, *args):
-        module = self.functions if action in self.config.get("data", {}) and self.functions else self.api
-        if not module: return None
-        if module is self.functions: return getattr(module, self.config["data"][action], None)(self, *args)
-        name = self.config["name"]
-        fn = getattr(module, f"get_{name}" if action == "get" else f"{action}_{name.rstrip('s')}", None)
-        return fn(*args) if fn else None
+        data = self.config.get("data", {})
+        if action in data and self.functions: return getattr(self.functions, data[action], lambda *_: None)(self, *args)
+        if self.api:
+            name = self.config["name"]
+            fn = getattr(self.api, f"get_{name}" if action == "get" else f"{action}_{name.rstrip('s')}", None)
+            return fn(*args) if fn else None
+        return getattr(self.rest, action)(*args) if self.rest else None
 
     def setup_ui(self):
         self.layout = QVBoxLayout(self); self.layout.setContentsMargins(10, 10, 10, 10); self.layout.setSpacing(10)
@@ -86,7 +89,7 @@ class PageBuilder(QWidget):
         if self.form_panel and self.config.get("form", {}).get("popup", True): self.form_panel.hide()
 
     def on_show(self):
-        if not self.api: return
+        if not (self.api or self.rest): return
         try:
             result = self._call("get"); key = self.config.get("list", {}).get("data_key", self.config["name"])
             if result and result.get("success"): self.set_data(result.get(key, []))
