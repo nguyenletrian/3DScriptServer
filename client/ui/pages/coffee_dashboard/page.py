@@ -1,0 +1,1 @@
+PAGE_CONFIG = {"name": "coffee_dashboard", "title": "Coffee Dashboard", "endpoint": "/coffee/orders", "list": {"data_key": "coffee_orders", "columns": [{"name": "id", "label": "Order"}, {"name": "status", "label": "Status"}, {"name": "total", "label": "Total"}, {"name": "created_at", "label": "Created"}], "actions": []}}
