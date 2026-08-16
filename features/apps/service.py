@@ -6,4 +6,4 @@ def get_apps():
     return app_repository.get_all()
 
 def create_app(name):
-    return app_repository.create({"name": name})
+    return app_repository.insert({"name": name})
