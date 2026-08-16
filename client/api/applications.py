@@ -1,5 +1,6 @@
 from ..config import SERVER_URL
 from ..session import get_http_session
+from .application_instances import activate_application
 
 
 def get_applications():
@@ -24,3 +25,7 @@ def delete_application(application_id):
     response = get_http_session().delete(f"{SERVER_URL}/applications/{application_id}", timeout=5)
     response.raise_for_status()
     return response.json()
+
+
+def activate_application(application_id):
+    return activate_application(application_id)
