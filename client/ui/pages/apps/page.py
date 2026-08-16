@@ -1,6 +1,8 @@
 PAGE_CONFIG = {
     "name": "apps",
     "title": "Apps",
+    "endpoint": "/apps",
+    "payload_key": "data",
     "add_button": {"text": "Add App"},
     "form": {
         "fields": {
