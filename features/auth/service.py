@@ -1,48 +1,13 @@
+from features.users.service import create_user
 from features.users.repository import user_repository
-from core.security import verify_password,hash_password
+from core.security import verify_password
 
 
-def authenticate_user(
-    username: str,
-    password: str
-):
-    user = user_repository.find_one(
-        username=username
-    )
-
-    print("SERVER AUTH USER:", user)
-
-    if user is None:
-        return None
-
-    if not verify_password(
-        password,
-        user["password"]
-    ):
-        return None
-
-    return user
+def authenticate_user(username: str, password: str):
+    user = user_repository.find_one(username=username)
+    return user if user and verify_password(password, user["password"]) else None
 
 
-def register_user(username: str,password: str):
-    existing_user = user_repository.find_one(username=username)
-    if existing_user is not None:
-        return None
-    users = user_repository.get_all()
-    if users:
-        user_id = max(
-            user["id"]
-            for user in users
-        ) + 1
-    else:
-        user_id = 1
-        
-    hashed_password = hash_password(
-        password
-    )
-    user = {
-        "username": username,
-        "password": hashed_password,
-        "role": "user"
-    }
-    return user_repository.insert(user)
+def register_user(username: str, password: str):
+    result = create_user(username, password)
+    return result["user"] if result["success"] else None
