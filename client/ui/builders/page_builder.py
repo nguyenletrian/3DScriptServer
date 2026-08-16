@@ -54,7 +54,7 @@ class PageBuilder(QWidget):
         if not config: return
         popup = config.get("popup", True); self.form_panel = QWidget(self); panel = QVBoxLayout(self.form_panel); panel.setContentsMargins(10, 10, 10, 10)
         if popup: self.form_panel.setStyleSheet("background: white; border: 1px solid #ccc;")
-        self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit")); self.form.setMaximumWidth(config.get("maximum_width", 300)); self.form.set_submit_callback(self.submit_form); panel.addWidget(self.form, alignment=Qt.AlignHCenter)
+        self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit")); self.form.setMinimumWidth(300); self.form.setMaximumWidth(max(300, self.width() - 40)); self.form.set_submit_callback(self.submit_form); panel.addWidget(self.form, alignment=Qt.AlignHCenter)
         if popup: self._build_popup_buttons(panel, config); self.form_panel.hide()
         else: self.form_panel.setStyleSheet(config.get("style", "")); panel.addWidget(self.form.submit_button); self.layout.addWidget(self.form_panel, alignment=Qt.AlignHCenter)
 
@@ -71,8 +71,10 @@ class PageBuilder(QWidget):
 
     def update_form_geometry(self):
         config = self.config.get("form", {})
-        if not self.form_panel or not config.get("popup", True): return
-        width = min(config.get("popup_width", 360), max(100, self.width() - 40)); self.form_panel.setGeometry((self.width() - width) // 2, 40, width, self.form_panel.sizeHint().height())
+        if not self.form_panel or not config.get("popup", True):
+            if self.form: self.form.setMaximumWidth(max(300, self.width() - 40))
+            return
+        available = max(300, self.width() - 40); width = min(config.get("popup_width", 360), available); self.form.setMaximumWidth(available); self.form_panel.setGeometry((self.width() - width) // 2, 40, width, self.form_panel.sizeHint().height())
 
     def show_form(self):
         if not self.form_panel or not self.config.get("form", {}).get("popup", True): return
