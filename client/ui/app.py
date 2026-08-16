@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QStackedWidget
 
 from .navigation import Navigation
 from .pages.login import LoginPage
-from .pages.register import RegisterPage
+from .pages.register.page import RegisterPage
 from .pages.dashboard import DashboardPage
 from .builders.page_builder import build_pages
 from ..api.auth import logout as api_logout
@@ -10,7 +10,6 @@ from .. import session
 
 
 class AppWindow(QWidget):
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle("ConnectVBS")
@@ -42,8 +41,8 @@ class AppWindow(QWidget):
         page = pages.get(name)
         if page:
             self.pages.setCurrentWidget(page)
-            if hasattr(page, "on_show"):
-                page.on_show()
+            if hasattr(page, "on_show"): page.on_show()
+            elif hasattr(page, "refresh"): page.refresh()
 
     def refresh_ui(self):
         user = session.get_user()
