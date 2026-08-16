@@ -1,13 +1,12 @@
 import importlib
-import importlib.util
-import pkgutil
+from pathlib import Path
 
-import features
+
+FEATURES_PATH = Path(__file__).resolve().parent.parent / "features"
 
 
 def load_routers():
-    for item in pkgutil.iter_modules(features.__path__):
-        module_name = f"features.{item.name}.router"
-        if importlib.util.find_spec(module_name) is None:
+    for path in sorted(FEATURES_PATH.iterdir()):
+        if not path.is_dir() or not (path / "router.py").exists():
             continue
-        yield importlib.import_module(module_name).router
+        yield importlib.import_module(f"features.{path.name}.router").router
