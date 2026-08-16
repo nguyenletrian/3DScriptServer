@@ -13,7 +13,11 @@ PAGE_CONFIG = {
         "clear_button": True, "close_button": True, "popup_width": 360, "maximum_width": 300,
     },
     "list": {
-        "columns": [{"name": "id", "label": "ID"}, {"name": "name", "label": "Name"}, {"name": "description", "label": "Description"}],
-        "actions": ["edit", "delete"],
+        "columns": [
+            {"name": "id", "label": "ID"},
+            {"name": "name", "label": "Name"},
+            {"name": "description", "label": "Description"},
+        ],
+        "actions": ["activate", "edit", "delete"],
     },
 }
