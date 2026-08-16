@@ -1,0 +1,4 @@
+PAGE_CONFIG = {
+    "name": "coffee_orders", "title": "Orders", "endpoint": "/coffee/orders", "list": {"data_key": "coffee_orders", "columns": [{"name": "id", "label": "ID"}, {"name": "customer_id", "label": "Customer"}, {"name": "status", "label": "Status"}, {"name": "total", "label": "Total"}, {"name": "created_at", "label": "Created"}], "actions": ["edit", "delete"]},
+    "add_button": {"text": "Add Order"}, "form": {"fields": {"customer_id": {"type": "text", "label": "Customer ID", "required": True}, "status": {"type": "select", "label": "Status", "options": ["pending", "confirmed", "completed", "cancelled"], "required": True}, "total": {"type": "number", "label": "Total", "required": True}}, "submit_text": "Create Order", "edit_submit_text": "Update Order", "clear_button": True, "close_button": True, "popup_width": 380}
+}
