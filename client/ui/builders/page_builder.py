@@ -14,22 +14,22 @@ class PageBuilder(QWidget):
         self.config = config or {}
         self.functions = self._load_functions()
         self.editing_id = None
-        self.form_panel = None
-        self.form = None
-        self.list = None
+        self.form_panel = self.form = self.list = None
         self.setup_ui()
 
     def _load_functions(self):
-        module_name = self.__class__.__module__.rsplit(".", 1)[0] + ".functions"
+        name = self.config.get("name")
+        if name:
+            module = f"{__package__.rsplit('.', 1)[0]}.pages.{name}.functions"
+        else:
+            module = self.__class__.__module__.rsplit(".", 1)[0] + ".functions"
         try:
-            return importlib.import_module(module_name)
+            return importlib.import_module(module)
         except ModuleNotFoundError:
             return None
 
     def _get_function(self, name):
-        if not self.functions or not name:
-            return None
-        return getattr(self.functions, name, None)
+        return getattr(self.functions, name, None) if self.functions and name else None
 
     def setup_ui(self):
         self.layout = QVBoxLayout(self)
@@ -48,9 +48,9 @@ class PageBuilder(QWidget):
             label.setStyleSheet("font-size: 24px; font-weight: bold;")
             header.addWidget(label)
         header.addStretch()
-        button_config = self.config.get("add_button")
-        if button_config:
-            self.add_button = QPushButton(button_config.get("text", "Add"))
+        button = self.config.get("add_button")
+        if button:
+            self.add_button = QPushButton(button.get("text", "Add"))
             self.add_button.clicked.connect(self.add_item)
             header.addWidget(self.add_button)
         self.layout.addLayout(header)
@@ -68,20 +68,16 @@ class PageBuilder(QWidget):
         config = self.config.get("form")
         if not config:
             return
-
         popup = config.get("popup", True)
         self.form_panel = QWidget(self)
         panel_layout = QVBoxLayout(self.form_panel)
         panel_layout.setContentsMargins(10, 10, 10, 10)
-
         if popup:
             self.form_panel.setStyleSheet("background: white; border: 1px solid #ccc;")
-
         self.form = FormBuilder(config.get("fields", {}), config.get("submit_text", "Submit"))
         self.form.setMaximumWidth(config.get("maximum_width", 300))
         self.form.set_submit_callback(self.submit_form)
         panel_layout.addWidget(self.form, alignment=Qt.AlignHCenter)
-
         if popup:
             self._build_popup_buttons(panel_layout, config)
             self.form_panel.hide()
@@ -91,28 +87,28 @@ class PageBuilder(QWidget):
             self.layout.addWidget(self.form_panel, alignment=Qt.AlignHCenter)
 
     def _build_popup_buttons(self, layout, config):
-        buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.form.submit_button)
+        row = QHBoxLayout()
+        row.addWidget(self.form.submit_button)
         if config.get("clear_button", True):
             self.clear_button = QPushButton(config.get("clear_text", "Clear"))
             self.clear_button.clicked.connect(self.clear_form)
-            buttons_layout.addWidget(self.clear_button)
+            row.addWidget(self.clear_button)
         if config.get("close_button", True):
             self.close_button = QPushButton(config.get("close_text", "Close"))
             self.close_button.clicked.connect(self.close_form)
-            buttons_layout.addWidget(self.close_button)
-        layout.addLayout(buttons_layout)
+            row.addWidget(self.close_button)
+        layout.addLayout(row)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self.update_form_geometry()
 
     def update_form_geometry(self):
-        if not self.form_panel or not self.config.get("form", {}).get("popup", True):
+        config = self.config.get("form", {})
+        if not self.form_panel or not config.get("popup", True):
             return
-        width = min(self.config.get("form", {}).get("popup_width", 360), max(100, self.width() - 40))
-        height = self.form_panel.sizeHint().height()
-        self.form_panel.setGeometry((self.width() - width) // 2, 40, width, height)
+        width = min(config.get("popup_width", 360), max(100, self.width() - 40))
+        self.form_panel.setGeometry((self.width() - width) // 2, 40, width, self.form_panel.sizeHint().height())
 
     def show_form(self):
         if not self.form_panel or not self.config.get("form", {}).get("popup", True):
@@ -131,9 +127,9 @@ class PageBuilder(QWidget):
             self.form_panel.hide()
 
     def on_show(self):
-        loader = self._get_function(self.config.get("data", {}).get("loader"))
-        if loader:
-            loader(self)
+        function = self._get_function(self.config.get("data", {}).get("loader"))
+        if function:
+            function(self)
 
     def set_data(self, data):
         if self.list:
@@ -178,12 +174,12 @@ class PageBuilder(QWidget):
             function(self, item.get("id"))
 
     def submit_form(self, data):
-        data_config = self.config.get("data", {})
-        name = "updater" if self.editing_id else "creator"
-        function_name = data_config.get(name) or data_config.get("submit")
-        function = self._get_function(function_name)
+        config = self.config.get("data", {})
+        function = self._get_function(config.get("updater" if self.editing_id else "creator") or config.get("submit"))
         if function:
-            if self.editing_id:
-                function(self, self.editing_id, data)
-            else:
-                function(self, data)
+            function(self, self.editing_id, data) if self.editing_id else function(self, data)
+
+
+def build_page(name):
+    module = importlib.import_module(f"{__package__.rsplit('.', 1)[0]}.pages.{name}.page")
+    return PageBuilder(module.PAGE_CONFIG)
