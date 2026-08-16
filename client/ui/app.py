@@ -4,7 +4,7 @@ from .navigation import Navigation
 from .pages.login import LoginPage
 from .pages.register import RegisterPage
 from .pages.dashboard import DashboardPage
-from .builders.page_builder import build_page
+from .builders.page_builder import build_pages
 from ..api.auth import logout as api_logout
 from .. import session
 
@@ -24,10 +24,11 @@ class AppWindow(QWidget):
         self.login_page = LoginPage()
         self.register_page = RegisterPage()
         self.dashboard_page = DashboardPage()
-        self.apps_page = build_page("apps")
-        self.users_page = build_page("users")
+        self.dynamic_pages = build_pages("apps", "users")
+        self.apps_page = self.dynamic_pages["apps"]
+        self.users_page = self.dynamic_pages["users"]
 
-        for page in (self.login_page, self.register_page, self.dashboard_page, self.apps_page, self.users_page):
+        for page in (self.login_page, self.register_page, self.dashboard_page, *self.dynamic_pages.values()):
             self.pages.addWidget(page)
 
         main_layout = QHBoxLayout(self)
