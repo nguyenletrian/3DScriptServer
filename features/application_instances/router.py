@@ -22,26 +22,18 @@ def activate(data: dict, user=Depends(require_login)):
     application_id = data.get("application_id")
     if not application_id:
         raise HTTPException(400, "application_id is required")
-
+    existing = next((x for x in instances.get_all() if x.get("application_id") == application_id and x.get("owner_user_id") == user["id"] and x.get("status") == "active"), None)
+    if existing:
+        return {"success": True, "application_instance": existing, "already_active": True}
     instance = {
-        "id": f"inst_{uuid4().hex[:10]}",
-        "application_id": application_id,
-        "owner_user_id": user["id"],
-        "name": data.get("name") or application_id,
-        "address": data.get("address", ""),
-        "phone": data.get("phone", ""),
-        "email": data.get("email", ""),
-        "status": "active",
-        "settings": {},
+        "id": f"inst_{uuid4().hex[:10]}", "application_id": application_id, "owner_user_id": user["id"],
+        "name": data.get("name") or application_id, "address": data.get("address", ""), "phone": data.get("phone", ""),
+        "email": data.get("email", ""), "status": "active", "settings": {},
     }
     result = instances.insert(instance)
     permissions.insert({
-        "id": f"perm_{uuid4().hex[:10]}",
-        "application_instance_id": result["id"],
-        "user_id": user["id"],
-        "role": "owner",
-        "permissions": ["*"],
-        "status": "active",
+        "id": f"perm_{uuid4().hex[:10]}", "application_instance_id": result["id"], "user_id": user["id"],
+        "role": "owner", "permissions": ["*"], "status": "active",
     })
     record_audit(user["id"], "activate", "application_instance", result["id"], after=result, application_instance_id=result["id"], metadata={"source": "web"})
-    return {"success": True, "application_instance": result}
+    return {"success": True, "application_instance": result, "already_active": False}
