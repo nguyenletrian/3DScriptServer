@@ -1,3 +1,4 @@
 from core.repository import BaseRepository
-class AppRepository(BaseRepository):
-    collection = "apps"
+
+
+app_repository = BaseRepository("apps")
