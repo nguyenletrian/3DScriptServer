@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton
-from ...api.apps import get_apps, create_app
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QLineEdit, QPushButton, QHBoxLayout
+from ...api.apps import get_apps, create_app, delete_app
 
 
 class AppsPage(QWidget):
@@ -47,7 +47,12 @@ class AppsPage(QWidget):
             return
 
         for app in result.get("apps", []):
-            self.apps_layout.addWidget(QLabel(f'{app["id"]} | ' f'{app["name"]}'))
+            row = QHBoxLayout()
+            row.addWidget(QLabel(f'{app["id"]} | ' f'{app["name"]}'))
+            button = QPushButton("Delete")
+            button.clicked.connect(lambda checked=False, app_id=app["id"]: self.delete_app(app_id))
+            row.addWidget(button)
+            self.apps_layout.addLayout(row)
 
     def create_app(self):
         name = self.name_edit.text().strip()
@@ -65,4 +70,16 @@ class AppsPage(QWidget):
             return
 
         self.name_edit.clear()
+        self.load_apps()
+
+    def delete_app(self, app_id):
+        try:
+            result = delete_app(app_id)
+        except Exception as e:
+            self.apps_layout.addWidget(QLabel(f"Failed to delete app: {e}"))
+            return
+
+        if not result.get("success"):
+            return
+
         self.load_apps()

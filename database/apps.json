@@ -8,9 +8,5 @@
         "id": 2,
         "name": "Pipeline Tools",
         "description": "General pipeline utilities"
-    },
-    {
-        "name": "Blender",
-        "id": 3
     }
 ]
