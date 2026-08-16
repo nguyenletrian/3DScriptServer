@@ -1,4 +1,8 @@
-from PySide6.QtWidgets import QWidget, QLabel, QLineEdit, QTextEdit, QDoubleSpinBox, QCheckBox, QComboBox, QVBoxLayout, QPushButton
+from PySide6.QtCore import Qt, QEvent
+from PySide6.QtWidgets import (
+    QWidget, QLabel, QLineEdit, QTextEdit, QDoubleSpinBox,
+    QCheckBox, QComboBox, QVBoxLayout, QPushButton,
+)
 from ..validation.validators import validate_required, get_validator
 from ..validation.formatters import get_formatter
 
@@ -22,49 +26,70 @@ class FormBuilder(QWidget):
 
         self.submit_button = QPushButton(submit_text)
         self.submit_button.clicked.connect(self.submit)
-        self.layout.addWidget(self.submit_button)
 
     def _add_field(self, name, config):
-        self.layout.addWidget(QLabel(config.get("label", name)))
+        label = QLabel(config.get("label", name))
+        label.setStyleSheet("border: none;")
+
+        self.layout.addWidget(label)
+
         widget = self._create_widget(config)
+
         error = QLabel()
-        error.setStyleSheet("color: red;")
+        error.setStyleSheet(
+            "border: none;"
+            "color: red;"
+        )
         error.hide()
+
+        widget.installEventFilter(self)
+
         self.widgets[name] = widget
         self.errors[name] = error
+
         self.layout.addWidget(widget)
         self.layout.addWidget(error)
 
-        if isinstance(widget, QLineEdit):
-            widget.returnPressed.connect(self._enter_pressed(name))
-
     def _create_widget(self, config):
         widget_type = config.get("type", "text")
+
         if widget_type == "textarea":
             return QTextEdit()
+
         if widget_type == "number":
             widget = QDoubleSpinBox()
             widget.setMaximum(config.get("maximum", 999999999))
             return widget
+
         if widget_type == "checkbox":
             return QCheckBox()
+
         if widget_type == "select":
             widget = QComboBox()
             widget.addItems(config.get("options", []))
             return widget
+
         return QLineEdit()
 
-    def _enter_pressed(self, name):
-        def handler():
-            if list(self.widgets)[-1] == name:
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if self._is_last_widget(obj):
                 self.submit()
-        return handler
+                return True
+
+        return super().eventFilter(obj, event)
+
+    def _is_last_widget(self, widget):
+        widgets = list(self.widgets.values())
+        return widgets and widgets[-1] is widget
 
     def set_data(self, data):
         for name, widget in self.widgets.items():
             if name not in data:
                 continue
+
             value = data[name]
+
             if isinstance(widget, QCheckBox):
                 widget.setChecked(bool(value))
             elif isinstance(widget, QComboBox):
@@ -80,6 +105,7 @@ class FormBuilder(QWidget):
 
     def get_data(self):
         data = {}
+
         for name, widget in self.widgets.items():
             if isinstance(widget, QCheckBox):
                 value = widget.isChecked()
@@ -91,8 +117,10 @@ class FormBuilder(QWidget):
                 value = widget.text()
             else:
                 value = widget.value()
+
             formatter = get_formatter(self.fields[name].get("formatter"))
             data[name] = formatter(value) if formatter else value
+
         return data
 
     def validate(self):
@@ -102,11 +130,14 @@ class FormBuilder(QWidget):
 
         for name, config in self.fields.items():
             value = data[name]
+
             if config.get("required") and not validate_required(value):
                 self.show_error(name, config.get("required_message", "This field is required."))
                 first_error = first_error or self.widgets[name]
                 continue
+
             validator = get_validator(config.get("validator"))
+
             if validator and validator(value) is not True:
                 self.show_error(name, config.get("invalid_message", "Invalid value."))
                 first_error = first_error or self.widgets[name]
@@ -114,6 +145,7 @@ class FormBuilder(QWidget):
         if first_error:
             first_error.setFocus()
             return False
+
         return True
 
     def show_error(self, name, message):
@@ -131,3 +163,18 @@ class FormBuilder(QWidget):
 
     def set_submit_callback(self, callback):
         self.submit_callback = callback
+
+    def clear(self):
+        for widget in self.widgets.values():
+            if isinstance(widget, QCheckBox):
+                widget.setChecked(False)
+            elif isinstance(widget, QComboBox):
+                widget.setCurrentIndex(0)
+            elif isinstance(widget, QTextEdit):
+                widget.clear()
+            elif isinstance(widget, QLineEdit):
+                widget.clear()
+            else:
+                widget.setValue(0)
+
+        self.clear_errors()
