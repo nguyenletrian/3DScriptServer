@@ -10,7 +10,7 @@ class ApplicationRuntime(QWidget):
     def __init__(self, instance=None, parent=None):
         super().__init__(parent)
         self.instance = instance or {}
-        self.pages = {name: build_page(name) for name in self.PAGE_NAMES}
+        self.pages = {name: build_page(name, self.instance) for name in self.PAGE_NAMES}
         self.stack = QStackedWidget()
         self.nav_widget = QWidget()
         self.nav_layout = QVBoxLayout(self.nav_widget)
