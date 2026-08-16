@@ -1,0 +1,47 @@
+from uuid import uuid4
+
+from fastapi import APIRouter, Depends, HTTPException
+
+from core.dependencies import require_login
+from core.repository import BaseRepository
+from core.audit import record_audit
+
+router = APIRouter(prefix="/application-instances", tags=["Application Instances"])
+instances = BaseRepository("application_instances")
+permissions = BaseRepository("application_instance_permissions")
+
+
+@router.get("")
+def get_instances(user=Depends(require_login)):
+    items = [x for x in instances.get_all() if x.get("owner_user_id") == user["id"]]
+    return {"success": True, "application_instances": items}
+
+
+@router.post("/activate")
+def activate(data: dict, user=Depends(require_login)):
+    application_id = data.get("application_id")
+    if not application_id:
+        raise HTTPException(400, "application_id is required")
+
+    instance = {
+        "id": f"inst_{uuid4().hex[:10]}",
+        "application_id": application_id,
+        "owner_user_id": user["id"],
+        "name": data.get("name") or application_id,
+        "address": data.get("address", ""),
+        "phone": data.get("phone", ""),
+        "email": data.get("email", ""),
+        "status": "active",
+        "settings": {},
+    }
+    result = instances.insert(instance)
+    permissions.insert({
+        "id": f"perm_{uuid4().hex[:10]}",
+        "application_instance_id": result["id"],
+        "user_id": user["id"],
+        "role": "owner",
+        "permissions": ["*"],
+        "status": "active",
+    })
+    record_audit(user["id"], "activate", "application_instance", result["id"], after=result, application_instance_id=result["id"], metadata={"source": "web"})
+    return {"success": True, "application_instance": result}
