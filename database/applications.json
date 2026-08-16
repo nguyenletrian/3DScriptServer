@@ -11,12 +11,17 @@
     },
     {
         "name": "3DsMax",
-        "description": "descirpt 3Ds Max",
+        "description": "script for 3Ds Max",
         "id": 3
     },
     {
         "name": "Newest",
         "description": "script newest",
         "id": 4
+    },
+    {
+        "id": "coffee",
+        "name": "Coffee Management",
+        "description": "Manage products, customers and orders for a coffee shop"
     }
 ]
