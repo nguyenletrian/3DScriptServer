@@ -1,39 +1,18 @@
-from ...builders.page_builder import PageBuilder
-
-
 PAGE_CONFIG = {
+    "name": "apps",
     "title": "Apps",
     "add_button": {"text": "Add App"},
-    "data": {
-        "loader": "load",
-        "creator": "create",
-        "updater": "update",
-        "deleter": "delete",
-    },
+    "data": {"loader": "load", "creator": "create", "updater": "update", "deleter": "delete"},
     "form": {
         "fields": {
             "name": {"type": "text", "label": "Name", "required": True},
             "description": {"type": "textarea", "label": "Description"},
         },
-        "submit_text": "Create App",
-        "edit_submit_text": "Update App",
-        "clear_button": True,
-        "close_button": True,
-        "popup_width": 360,
-        "maximum_width": 300,
+        "submit_text": "Create App", "edit_submit_text": "Update App",
+        "clear_button": True, "close_button": True, "popup_width": 360, "maximum_width": 300,
     },
     "list": {
-        "columns": [
-            {"name": "id", "label": "ID"},
-            {"name": "name", "label": "Name"},
-            {"name": "description", "label": "Description"},
-        ],
+        "columns": [{"name": "id", "label": "ID"}, {"name": "name", "label": "Name"}, {"name": "description", "label": "Description"}],
         "actions": ["edit", "delete"],
     },
 }
-
-
-class AppsPage(PageBuilder):
-
-    def __init__(self):
-        super().__init__(PAGE_CONFIG)
