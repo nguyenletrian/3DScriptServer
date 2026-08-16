@@ -1,0 +1,7 @@
+[
+  {"id": "prod_001", "category_id": "cat_001", "name": "Espresso", "price": 30000, "status": "active"},
+  {"id": "prod_002", "category_id": "cat_001", "name": "Cappuccino", "price": 45000, "status": "active"},
+  {"id": "prod_003", "category_id": "cat_001", "name": "Latte", "price": 45000, "status": "active"},
+  {"id": "prod_004", "category_id": "cat_002", "name": "Peach Tea", "price": 40000, "status": "active"},
+  {"id": "prod_005", "category_id": "cat_003", "name": "Cheesecake", "price": 55000, "status": "active"}
+]
