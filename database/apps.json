@@ -3,9 +3,5 @@
         "id": 1,
         "name": "Maya Tools",
         "description": "Tools for Maya workflows"
-    },
-    {
-        "name": "Blender",
-        "id": 2
     }
 ]
