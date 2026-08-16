@@ -15,10 +15,11 @@ permissions = BaseRepository("application_instance_permissions")
 def seed_application(application_id, instance_id):
     try:
         module = import_module(f"features.{application_id}.instance")
-        seed = getattr(module, "seed_instance", None)
-        if seed: seed(instance_id)
-    except ModuleNotFoundError:
-        pass
+    except ModuleNotFoundError as error:
+        if error.name != f"features.{application_id}.instance": raise
+        return
+    seed = getattr(module, "seed_instance", None)
+    if seed: seed(instance_id)
 
 
 @router.get("")
