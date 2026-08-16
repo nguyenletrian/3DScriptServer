@@ -10,17 +10,13 @@ router = APIRouter(prefix="/application-instances", tags=["Application Instances
 instances = BaseRepository("application_instances")
 permissions = BaseRepository("application_instance_permissions")
 applications = BaseRepository("applications")
+APPLICATION_MODULES = {5: "coffee"}
 
 
 def seed_application(application_id, instance_id):
-    application = applications.get(application_id)
-    if not application: raise HTTPException(404, "Application not found")
-    module_name = application.get("short_name", str(application_id))
-    try:
-        module = import_module(f"features.{module_name}.instance")
-    except ModuleNotFoundError as error:
-        if error.name != f"features.{module_name}.instance": raise
-        return
+    module_name = APPLICATION_MODULES.get(application_id)
+    if not module_name: return
+    module = import_module(f"features.{module_name}.instance")
     seed = getattr(module, "seed_instance", None)
     if seed: seed(instance_id)
 
@@ -45,13 +41,13 @@ def activate(data: dict, user=Depends(require_login)):
         return {"success": True, "application_instance": existing, "already_active": True}
     instance = {
         "application_id": application_id, "owner_user_id": user["id"],
-        "name": data.get("name") or application.get("name") or application.get("short_name") or str(application_id),
+        "name": data.get("name") or application.get("name") or str(application_id),
         "address": data.get("address", ""), "phone": data.get("phone", ""), "email": data.get("email", ""),
         "status": "active", "settings": {},
     }
     result = instances.insert(instance)
-    application_short_name = application.get("short_name") or application.get("name") or str(application_id)
-    result["short_name"] = f"{application_short_name}_{result['id']}"
+    public_name = application.get("short_name") or application.get("name") or str(application_id)
+    result["short_name"] = f"{public_name}_{result['id']}"
     instances.update(result["id"], result)
     permissions.insert({
         "application_instance_id": result["id"], "user_id": user["id"],
