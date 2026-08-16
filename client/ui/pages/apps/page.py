@@ -2,7 +2,6 @@ PAGE_CONFIG = {
     "name": "apps",
     "title": "Apps",
     "add_button": {"text": "Add App"},
-    "data": {"loader": "load", "creator": "create", "updater": "update", "deleter": "delete"},
     "form": {
         "fields": {
             "name": {"type": "text", "label": "Name", "required": True},
