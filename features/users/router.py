@@ -78,6 +78,7 @@ def update_user(user_id: int, data: dict, user=Depends(require_admin)):
         user_id,
         data.get("username", ""),
         data.get("role", "user"),
+        data.get("password") or None,
     )
 
     if not result["success"]:
@@ -97,5 +98,4 @@ def update_user(user_id: int, data: dict, user=Depends(require_admin)):
 
 @router.delete("/{user_id}")
 def delete_user(user_id: int, user=Depends(require_admin)):
-    result = delete_user_service(user_id)
-    return result
+    return delete_user_service(user_id)
