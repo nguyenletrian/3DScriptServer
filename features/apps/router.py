@@ -1,10 +1,4 @@
 from core.crud import crud_router
+from .config import CONFIG
 
-
-router = crud_router(
-    "/apps",
-    "Apps",
-    "apps",
-    response_key="app",
-    payload_key="data",
-)
+router = crud_router(CONFIG)
