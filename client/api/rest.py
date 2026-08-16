@@ -14,10 +14,13 @@ class RestAPI:
         payload = {self.payload_key: data} if self.payload_key and data is not None else data
         params = {"application_instance_id": self.instance_id} if self.instance_id else None
         response = get_http_session().request(method, f"{self.url}{path}", params=params, json=payload, timeout=5)
-        response.raise_for_status()
+        if not response.ok:
+            try: detail = response.json().get("detail", response.text)
+            except ValueError: detail = response.text
+            raise requests.HTTPError(f"{response.status_code} {detail}", response=response)
         return response.json()
 
     def get(self): return self._request("GET")
     def create(self, data): return self._request("POST", data=data)
     def update(self, item_id, data): return self._request("PUT", f"/{item_id}", data)
-    def delete(self, item_id): return self._request("DELETE", f"/{item_id}")
+    def delete(self, item_id): return self._request("DELETE", f"/{item_id}", data=None)
